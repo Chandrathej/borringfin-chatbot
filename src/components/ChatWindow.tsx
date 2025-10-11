@@ -3,7 +3,14 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { FaArrowUp, FaMicrophone } from "react-icons/fa";
 
-type Message = { role: "user" | "assistant"; content: string };
+type Message = { role: "user" | "assistant"; content: string; emoji?: string };
+
+// Safe Google Analytics tracker
+const trackEvent = (name: string, params?: Record<string, any>) => {
+  if (typeof window !== "undefined" && (window as any).gtag) {
+    (window as any).gtag(name, params);
+  }
+};
 
 export default function ChatWindow() {
   const [message, setMessage] = useState("");
@@ -22,7 +29,15 @@ export default function ChatWindow() {
     if (!message.trim()) return;
 
     setLoading(true);
-    setConversation((prev) => [...prev, { role: "user", content: message }]);
+
+    setConversation((prev) => [
+      ...prev,
+      { role: "user", content: message, emoji: "🙂" },
+    ]);
+
+    // Track Google Analytics
+    trackEvent("send_message", { message_length: message.length });
+
     setMessage("");
 
     try {
@@ -38,13 +53,17 @@ export default function ChatWindow() {
 
       setConversation((prev) => [
         ...prev,
-        { role: "assistant", content: data.reply || "No reply" },
+        {
+          role: "assistant",
+          content: data.reply || "No reply",
+          emoji: "🤖",
+        },
       ]);
     } catch (err) {
       console.error(err);
       setConversation((prev) => [
         ...prev,
-        { role: "assistant", content: "Error connecting to API" },
+        { role: "assistant", content: "Error connecting to API", emoji: "⚠️" },
       ]);
     } finally {
       setLoading(false);
@@ -68,18 +87,19 @@ export default function ChatWindow() {
         {conversation.map((msg, idx) => (
           <div
             key={idx}
-            className={`p-3 rounded-lg break-words w-full max-w-full ${
+            className={`p-3 rounded-2xl break-words w-full max-w-full ${
               msg.role === "user"
-                ? "bg-white text-black self-end"
-                : "bg-gray-800 self-start text-white"
+                ? "bg-indigo-500 text-white self-end shadow hover:scale-105 transition-transform"
+                : "bg-gray-800 self-start text-white shadow hover:scale-105 transition-transform"
             }`}
           >
+            {msg.emoji && <span className="mr-1">{msg.emoji}</span>}
             {msg.content}
           </div>
         ))}
       </div>
 
-      {/* Input row */}
+      {/* Input + buttons */}
       <div className="flex items-center space-x-2">
         <input
           type="text"

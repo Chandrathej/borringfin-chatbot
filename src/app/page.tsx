@@ -1,30 +1,38 @@
 "use client";
 
+import React from "react";
 import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
-import { FaQuestionCircle } from "react-icons/fa";
 
-export default function Home() {
+const Page = () => {
   return (
-    <main className="flex h-screen bg-gray-900 text-white">
+    <div className="flex h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-0 relative px-8 py-6">
-        {/* Top bar: title left, sign-in right */}
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-4xl font-bold flex items-center gap-2">
-            BoringFin <FaQuestionCircle />
-          </h1>
-          <button className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col ml-60 p-6 gap-6">
+        {/* Header */}
+        <header className="sticky top-0 bg-gray-900 py-4 px-6 z-10 shadow-md rounded-b flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Boringfin</h1>
+            <p className="text-gray-300 mt-1 text-sm">
+              Your friendly personal finance assistant 🤖
+            </p>
+          </div>
+
+          <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition">
             Sign In
           </button>
-        </div>
+        </header>
 
-        {/* Chat window */}
-        <ChatWindow />
-      </div>
-    </main>
+        {/* Chat Window */}
+        <div className="flex-1 flex flex-col">
+          <ChatWindow />
+        </div>
+      </main>
+    </div>
   );
-}
+};
+
+export default Page;
