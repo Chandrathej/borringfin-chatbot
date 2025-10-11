@@ -13,7 +13,7 @@ const Page = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col ml-60 p-6 gap-6">
         {/* Header */}
-        <header className="sticky top-0 bg-gray-800 py-4 px-6 z-10 shadow-md rounded-b flex justify-between items-center">
+        <header className="sticky top-0 bg-gray-800 py-4 px-6 z-10 shadow-md rounded-b flex justify-between items-center transition-colors duration-150">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-100">Boringfin</h1>
             <p className="text-gray-400 mt-1 text-sm">
@@ -21,7 +21,7 @@ const Page = () => {
             </p>
           </div>
 
-          <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl shadow transition-colors">
+          <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-xl shadow transition-transform duration-150 hover:scale-105">
             Sign In
           </button>
         </header>

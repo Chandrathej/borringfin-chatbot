@@ -83,10 +83,10 @@ export default function ChatWindow() {
         {conversation.map((msg, idx) => (
           <div
             key={idx}
-            className={`p-3 rounded-2xl break-words max-w-full shadow ${
+            className={`p-3 rounded-2xl break-words max-w-full shadow transition-transform duration-150 ${
               msg.role === "user"
-                ? "bg-gray-700 text-white self-end"
-                : "bg-gray-800 self-start text-gray-200"
+                ? "bg-gray-700 text-white self-end transform hover:scale-105"
+                : "bg-gray-800 self-start text-gray-200 transform hover:scale-105"
             }`}
           >
             {msg.emoji && <span className="mr-1">{msg.emoji}</span>}
@@ -109,17 +109,17 @@ export default function ChatWindow() {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask me a finance question..."
-          className="w-full p-3 pr-20 rounded-xl border border-gray-700 bg-gray-900 text-white outline-none shadow focus:border-gray-500"
+          className="w-full p-3 pr-20 rounded-xl border border-gray-700 bg-gray-900 text-white outline-none shadow focus:border-gray-500 transition-colors duration-150"
         />
 
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-          <FaMicrophone className="text-gray-400 hover:text-gray-200 cursor-pointer" />
+          <FaMicrophone className="text-gray-400 hover:text-gray-200 cursor-pointer transition-colors duration-150" />
           {sentConfirm ? (
-            <FaCheck className="text-green-400" />
+            <FaCheck className="text-green-400 transition-transform duration-150 animate-bounce" />
           ) : (
             <FaArrowUp
               onClick={sendMessage}
-              className={`text-gray-300 cursor-pointer hover:text-gray-200 ${
+              className={`text-gray-300 cursor-pointer hover:text-gray-200 transition-colors duration-150 ${
                 loading || !message.trim() ? "opacity-50 pointer-events-none" : ""
               }`}
             />
