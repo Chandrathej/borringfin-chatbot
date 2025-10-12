@@ -1,130 +1,177 @@
 "use client";
 
-import { useState, useRef, useEffect, KeyboardEvent } from "react";
-import { FaArrowUp, FaMicrophone, FaCheck } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { MicrophoneIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
-type Message = { role: "user" | "assistant"; content: string; emoji?: string };
-
-const trackEvent = (name: string, params?: Record<string, any>) => {
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag(name, params);
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
   }
-};
+}
+
+interface Message {
+  id: number;
+  text: string;
+  sender: "user" | "bot";
+  typing?: boolean;
+}
 
 export default function ChatWindow() {
-  const [message, setMessage] = useState("");
-  const [conversation, setConversation] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [sentConfirm, setSentConfirm] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState("");
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-
+  // Initialize SpeechRecognition
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [conversation]);
+    if (typeof window === "undefined") return;
 
-  const sendMessage = async () => {
-    if (!message.trim()) return;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
 
-    setLoading(true);
-    setConversation((prev) => [
-      ...prev,
-      { role: "user", content: message, emoji: "🙂" },
-    ]);
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
 
-    trackEvent("send_message", { message_length: message.length });
-    setMessage("");
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0].transcript)
+        .join("");
+      setInputText(transcript);
+    };
 
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
+    recognitionRef.current = recognition;
+  }, []);
 
-      if (!res.ok) throw new Error("API request failed");
-
-      const data = await res.json();
-
-      setConversation((prev) => [
-        ...prev,
-        { role: "assistant", content: data.reply || "No reply", emoji: "🤖" },
-      ]);
-
-      setSentConfirm(true);
-      setTimeout(() => setSentConfirm(false), 1000);
-    } catch (err) {
-      console.error(err);
-      setConversation((prev) => [
-        ...prev,
-        { role: "assistant", content: "Error connecting to API", emoji: "⚠️" },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+  const startListening = () => {
+    if (!recognitionRef.current || listening) return;
+    recognitionRef.current.start();
+    setListening(true);
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+  const stopListening = () => {
+    if (!recognitionRef.current || !listening) return;
+    recognitionRef.current.stop();
+    setListening(false);
+  };
+
+  const sendMessage = async () => {
+    if (!inputText.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      text: inputText,
+      sender: "user",
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputText("");
+    setListening(false);
+
+    const thinkingMessage: Message = {
+      id: Date.now() + 1,
+      text: "AI is thinking...",
+      sender: "bot",
+      typing: true,
+    };
+    setMessages((prev) => [...prev, thinkingMessage]);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage.text }),
+      });
+      const data = await response.json();
+
+      // Replace AI thinking message
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === thinkingMessage.id
+            ? { ...msg, text: data.reply, typing: false }
+            : msg
+        )
+      );
+    } catch (err) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === thinkingMessage.id
+            ? { ...msg, text: "Error connecting to backend", typing: false }
+            : msg
+        )
+      );
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-900 rounded-xl p-4 min-h-0 shadow-inner">
+    <div className="flex flex-col h-full w-full bg-neutral-950 rounded-lg shadow-lg">
       {/* Messages */}
       <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto mb-4 space-y-3 min-h-0"
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-2"
       >
-        {conversation.map((msg, idx) => (
+        {messages.map((msg) => (
           <div
-            key={idx}
-            className={`p-3 rounded-2xl break-words max-w-full shadow transition-transform duration-150 ${
-              msg.role === "user"
-                ? "bg-gray-700 text-white self-end transform hover:scale-105"
-                : "bg-gray-800 self-start text-gray-200 transform hover:scale-105"
+            key={msg.id}
+            className={`${
+              msg.sender === "user" ? "text-right" : "text-left"
             }`}
           >
-            {msg.emoji && <span className="mr-1">{msg.emoji}</span>}
-            {msg.content}
+            <div
+              className={`inline-block px-4 py-2 rounded-lg ${
+                msg.sender === "user"
+                  ? "bg-blue-500"
+                  : msg.typing
+                  ? "bg-gray-600 italic animate-pulse"
+                  : "bg-gray-700"
+              }`}
+            >
+              {msg.text}
+            </div>
           </div>
         ))}
-
-        {loading && (
-          <div className="p-3 rounded-2xl bg-gray-800 self-start animate-pulse shadow">
-            🤖 AI is thinking...
-          </div>
-        )}
       </div>
 
-      {/* Input with mic + send/tick */}
-      <div className="relative">
+      {/* Input bar */}
+      <div className="flex items-center px-3 py-2 bg-neutral-900 gap-2 rounded-b-lg">
         <input
           type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask me a finance question..."
-          className="w-full p-3 pr-20 rounded-xl border border-gray-700 bg-gray-900 text-white outline-none shadow focus:border-gray-500 transition-colors duration-150"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Type a message..."
+          className={`flex-1 p-3 rounded-full bg-neutral-700 text-white focus:outline-none border-none ${
+            listening ? "animate-pulse" : ""
+          }`}
         />
 
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-          <FaMicrophone className="text-gray-400 hover:text-gray-200 cursor-pointer transition-colors duration-150" />
-          {sentConfirm ? (
-            <FaCheck className="text-green-400 transition-transform duration-150 animate-bounce" />
-          ) : (
-            <FaArrowUp
-              onClick={sendMessage}
-              className={`text-gray-300 cursor-pointer hover:text-gray-200 transition-colors duration-150 ${
-                loading || !message.trim() ? "opacity-50 pointer-events-none" : ""
-              }`}
-            />
-          )}
-        </div>
+        {/* Voice icon */}
+        <button
+          onMouseEnter={startListening}
+          onMouseLeave={stopListening}
+          className={`text-gray-200 hover:text-white p-2 ${
+            listening ? "animate-pulse" : ""
+          }`}
+        >
+          <MicrophoneIcon className="w-6 h-6" />
+        </button>
+
+        {/* Send button */}
+        <button
+          onClick={sendMessage}
+          disabled={!inputText.trim()}
+          className={`p-2 ${
+            inputText.trim()
+              ? "text-gray-200 hover:text-white"
+              : "text-gray-500 cursor-not-allowed"
+          }`}
+        >
+          <PaperAirplaneIcon className="w-6 h-6 rotate-90" />
+        </button>
       </div>
     </div>
   );

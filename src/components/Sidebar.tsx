@@ -1,72 +1,59 @@
 "use client";
 
-import React from "react";
-import { FaHome, FaChartLine, FaUser, FaPlus } from "react-icons/fa";
-import { usePathname } from "next/navigation";
+import { HomeIcon, ChartBarIcon, RectangleStackIcon, UserIcon, PlusIcon } from "@heroicons/react/24/outline";
 
-interface ChatSummary {
-  id: string;
-  title: string;
-}
-
-const Sidebar = () => {
-  const pathname = usePathname();
-
-  const previousChats: ChatSummary[] = [
-    { id: "1", title: "Retirement Planning" },
-    { id: "2", title: "Loan Analysis" },
-    { id: "3", title: "Budget Review" },
+export default function Sidebar() {
+  const menuItems = [
+    { label: "Home", icon: <HomeIcon className="w-5 h-5" /> },
+    { label: "Analytics", icon: <ChartBarIcon className="w-5 h-5" /> },
+    { label: "Dashboard", icon: <RectangleStackIcon className="w-5 h-5" /> },
+    { label: "Profile", icon: <UserIcon className="w-5 h-5" /> },
   ];
 
-  const menuItems = [
-    { name: "Home", icon: <FaHome />, path: "/" },
-    { name: "Analytics", icon: <FaChartLine />, path: "/analytics" },
-    { name: "Profile", icon: <FaUser />, path: "/profile" },
+  const previousChats = [
+    "Retirement Planning",
+    "Budget Analysis",
+    "Loan Review",
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-gray-900 text-gray-200 shadow-lg flex flex-col justify-between">
-      {/* Top: New Chat */}
-      <div className="p-6 flex flex-col gap-6">
-        <button className="flex items-center gap-2 bg-gray-800 px-3 py-3 rounded-xl shadow hover:bg-gray-700 transition-colors transform hover:scale-105 duration-150 text-gray-100 font-medium">
-          <FaPlus /> New Chat
+    <div className="flex flex-col justify-between w-64 h-screen bg-neutral-900 text-gray-200 p-4">
+      {/* Top Section */}
+      <div className="space-y-4">
+        {/* New Chat */}
+        <button className="w-full flex items-center gap-2 px-4 py-2 rounded hover:bg-neutral-800 transition-colors font-medium cursor-pointer">
+          <PlusIcon className="w-5 h-5 text-blue-500" />
+          New Chat
         </button>
 
         {/* Menu Items */}
-        <nav className="flex flex-col gap-4 mt-6">
+        <div className="mt-6 space-y-2">
           {menuItems.map((item) => (
-            <a
-              key={item.name}
-              href={item.path}
-              className={`flex items-center gap-3 px-3 py-2 rounded transition-all duration-150 font-medium text-gray-200 ${
-                pathname === item.path
-                  ? "bg-gray-800 border-l-4 border-blue-gray-400 pl-2 text-gray-100 scale-105"
-                  : "hover:bg-gray-700 hover:scale-105"
-              }`}
+            <button
+              key={item.label}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded hover:bg-neutral-800 transition-colors font-medium cursor-pointer"
             >
-              {item.icon} {item.name}
-            </a>
+              {item.icon}
+              {item.label}
+            </button>
           ))}
-        </nav>
+        </div>
       </div>
 
-      {/* Bottom: Previous Chats */}
-      <div className="p-6 flex flex-col gap-2 border-t border-gray-700 overflow-y-auto max-h-1/3">
-        <h3 className="text-gray-400 uppercase text-xs mb-2 font-semibold">
+      {/* Bottom Section - Previous Chats */}
+      <div className="mt-6 space-y-2">
+        <h3 className="text-gray-400 text-xs uppercase tracking-wide">
           Previous Chats
         </h3>
         {previousChats.map((chat) => (
-          <a
-            key={chat.id}
-            href={`/chat/${chat.id}`}
-            className="px-3 py-2 rounded hover:bg-gray-700 hover:scale-105 transition-all duration-150 text-gray-200 font-medium"
+          <button
+            key={chat}
+            className="w-full text-left px-4 py-2 rounded hover:bg-neutral-800 transition-colors font-medium cursor-pointer"
           >
-            {chat.title}
-          </a>
+            {chat}
+          </button>
         ))}
       </div>
-    </aside>
+    </div>
   );
-};
-
-export default Sidebar;
+}
