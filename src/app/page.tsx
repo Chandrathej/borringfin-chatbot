@@ -1,9 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
+import ModuleBar from "../components/ModuleBar";
 import { useSession, signIn, signOut, SessionProvider } from "next-auth/react";
+
+const modules = [
+  "Debt & Liability",
+  "Tax Planning",
+  "Goal Planning",
+  "Expense Analysis",
+  "Insurance",
+  "Investment",
+  "Financial Education",
+];
 
 export default function PageWrapper() {
   return (
@@ -15,6 +26,7 @@ export default function PageWrapper() {
 
 function Page() {
   const { data: session, status } = useSession();
+  const [activeModule, setActiveModule] = useState<string | null>(null);
 
   if (status === "loading") {
     return (
@@ -33,12 +45,10 @@ function Page() {
       <div className="flex flex-col flex-1 relative">
         {/* Header */}
         <header className="flex justify-between items-center px-6 py-3 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur-md z-10">
-          {/* Logo + Branding + Welcome */}
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
-              {/* SVG Icon */}
               <svg
-                className="w-8 h-8 text-blue-500"
+                className="w-8 h-8 text-gray-300"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -53,7 +63,6 @@ function Page() {
             </span>
           </div>
 
-          {/* Sign In / Sign Out */}
           <div>
             {!session ? (
               <button
@@ -73,14 +82,46 @@ function Page() {
           </div>
         </header>
 
-        {/* Page content & Chat */}
+        {/* Page content */}
         <main className="flex-1 flex flex-col p-6">
-          {/* Optional main content can go here */}
+          {!activeModule ? (
+            <ModuleBar onModuleClick={(moduleName: string) => setActiveModule(moduleName)} />
+          ) : (
+            <div className="flex flex-col flex-1 gap-4">
+              {/* Top bar */}
+              <div className="flex items-center gap-3">
+                {/* Back Button with rounded hover glow */}
+                <div className="relative group">
+                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-neutral-400/20 to-neutral-600/10 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-300"></div>
+                  <button
+                    onClick={() => setActiveModule(null)}
+                    className="relative px-4 py-2 text-gray-200 border border-neutral-700/60 rounded-full bg-neutral-900/50 backdrop-blur-md 
+                    transition-all duration-300 group-hover:scale-105 group-hover:border-neutral-500 group-hover:shadow-[0_0_12px_rgba(255,255,255,0.1)]"
+                  >
+                    &larr; Back
+                  </button>
+                </div>
 
-          {/* ChatWindow fills remaining space */}
-          <div className="flex-1 flex flex-col">
-            <ChatWindow />
-          </div>
+                {/* Dropdown with same glassy styling */}
+                <select
+                  value={activeModule}
+                  onChange={(e) => setActiveModule(e.target.value)}
+                  className="bg-neutral-900/40 backdrop-blur-md text-gray-100 px-3 py-2 rounded-xl border border-neutral-700/50 shadow-inner focus:outline-none hover:border-neutral-500/70 transition-all duration-300"
+                >
+                  {modules.map((mod) => (
+                    <option key={mod} value={mod}>
+                      {mod}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Chat window */}
+              <div className="flex-1 flex flex-col bg-neutral-950/80 backdrop-blur-md rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.05)] p-4">
+                <ChatWindow moduleName={activeModule} />
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
