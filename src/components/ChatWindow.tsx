@@ -177,18 +177,32 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
             }`}
         />
 
-        {/* Voice Button */}
-        <button
-          onMouseEnter={startListening}
-          onMouseLeave={stopListening}
-          className={`p-2 rounded-full transition-all duration-300 ${
-            listening
-              ? "bg-blue-500/30 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.3)] animate-pulse"
-              : "text-gray-300 hover:bg-neutral-700/60"
-          }`}
-        >
-          <MicrophoneIcon className="w-6 h-6" />
-        </button>
+        {/* Voice Button + Sound Waves */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (listening) stopListening();
+              else startListening();
+            }}
+            className={`p-2 rounded-full transition-all duration-300 ${
+              listening
+                ? "bg-blue-500/30 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.3)] animate-pulse"
+                : "text-gray-300 hover:bg-neutral-700/60"
+            }`}
+          >
+            <MicrophoneIcon className="w-6 h-6" />
+          </button>
+
+          {/* Animated Sound Waves */}
+          {listening && (
+            <div className="flex items-end gap-1 ml-2">
+              <div className="w-1 h-3 bg-green-400 animate-bounce"></div>
+              <div className="w-1 h-5 bg-green-400 animate-bounce delay-75"></div>
+              <div className="w-1 h-4 bg-green-400 animate-bounce delay-150"></div>
+              <div className="w-1 h-6 bg-green-400 animate-bounce delay-200"></div>
+            </div>
+          )}
+        </div>
 
         {/* Send Button */}
         <button
