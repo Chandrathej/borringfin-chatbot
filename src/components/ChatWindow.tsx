@@ -78,10 +78,12 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
       sender: "user",
     };
 
+    // Add user message
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setListening(false);
 
+    // Show typing indicator for bot
     const thinkingMessage: Message = {
       id: Date.now() + 1,
       text: "AI is thinking...",
@@ -91,11 +93,20 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
     setMessages((prev) => [...prev, thinkingMessage]);
 
     try {
+      // Prepare conversation for backend
+      const conversation = messages
+        .map((msg) => ({
+          role: msg.sender === "user" ? "user" : "assistant",
+          content: msg.text,
+        }))
+        .concat([{ role: "user", content: userMessage.text }]);
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.text }),
+        body: JSON.stringify({ messages: conversation }),
       });
+
       const data = await response.json();
 
       setMessages((prev) =>

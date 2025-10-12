@@ -7,22 +7,25 @@ const client = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    const { message } = await req.json();
+    const { messages } = await req.json();
 
-    if (!message) {
-      return NextResponse.json({ reply: "No message provided." }, { status: 400 });
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ reply: "No messages provided." }, { status: 400 });
     }
+
+    // Prepend system message
+    const chatMessages = [
+      {
+        role: "system",
+        content:
+          "You are BoringFin Assistant — a friendly, witty personal finance AI. Keep answers short, clear, and engaging.",
+      },
+      ...messages,
+    ];
 
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are BoringFin Assistant — a friendly, witty personal finance AI. Keep answers short, clear, and engaging.",
-        },
-        { role: "user", content: message },
-      ],
+      messages: chatMessages,
     });
 
     const reply = completion.choices[0].message.content;
