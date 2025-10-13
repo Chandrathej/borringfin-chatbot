@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
 import ModuleBar from "../components/ModuleBar";
@@ -37,7 +38,7 @@ function Page() {
   }
 
   return (
-    <div className="flex h-screen bg-neutral-950 text-gray-100">
+    <div className="flex h-screen bg-neutral-950 text-gray-100 overflow-hidden">
       {/* Sidebar */}
       <Sidebar />
 
@@ -54,74 +55,104 @@ function Page() {
               >
                 <path d="M12 2L2 7v7c0 5 5 9 10 9s10-4 10-9V7l-10-5zM12 12a3 3 0 100-6 3 3 0 000 6z" />
               </svg>
-              <span className="text-2xl font-semibold font-sans text-gray-100 tracking-tight">
+              <span className="text-2xl md:text-3xl font-semibold tracking-tight text-gray-100">
                 BoringFin
               </span>
             </div>
-            <span className="text-sm text-gray-400 mt-1">
-              Welcome! Your personal finance assistant
+            <span className="text-sm md:text-base text-gray-400 mt-1">
+              Your personal finance assistant
             </span>
           </div>
 
           <div>
             {!session ? (
-              <button
-                className="text-gray-200 border border-gray-700 px-3 py-1 rounded hover:bg-neutral-800"
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(0,200,255,0.25)" }}
+                whileTap={{ scale: 0.97 }}
+                className="text-gray-200 border border-gray-700 px-3 py-1 rounded hover:bg-neutral-800 transition-all duration-200"
                 onClick={() => signIn("google")}
               >
                 Sign In
-              </button>
+              </motion.button>
             ) : (
-              <button
-                className="text-gray-200 border border-gray-700 px-3 py-1 rounded hover:bg-neutral-800"
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(0,200,255,0.25)" }}
+                whileTap={{ scale: 0.97 }}
+                className="text-gray-200 border border-gray-700 px-3 py-1 rounded hover:bg-neutral-800 transition-all duration-200"
                 onClick={() => signOut()}
               >
                 Sign Out
-              </button>
+              </motion.button>
             )}
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 flex flex-col p-6">
-          {!activeModule ? (
-            <ModuleBar onModuleClick={(moduleName: string) => setActiveModule(moduleName)} />
-          ) : (
-            <div className="flex flex-col flex-1 gap-4">
-              {/* Top bar */}
-              <div className="flex items-center gap-3">
-                {/* Back Button with rounded hover glow */}
-                <div className="relative group">
-                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-neutral-400/20 to-neutral-600/10 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-300"></div>
-                  <button
-                    onClick={() => setActiveModule(null)}
-                    className="relative px-4 py-2 text-gray-200 border border-neutral-700/60 rounded-full bg-neutral-900/50 backdrop-blur-md 
-                    transition-all duration-300 group-hover:scale-105 group-hover:border-neutral-500 group-hover:shadow-[0_0_12px_rgba(255,255,255,0.1)]"
+        <main className="flex-1 flex flex-col p-6 overflow-y-auto">
+          <AnimatePresence mode="wait">
+            {!activeModule ? (
+              <motion.div
+                key="modules"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                <ModuleBar onModuleClick={(moduleName: string) => setActiveModule(moduleName)} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="chat"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col flex-1 gap-4"
+              >
+                {/* Top bar */}
+                <div className="flex items-center gap-3">
+                  {/* Back Button with rounded hover glow */}
+                  <motion.div
+                    className="relative"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    &larr; Back
-                  </button>
+                    <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-neutral-400/20 to-neutral-600/10 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-300"></div>
+                    <button
+                      onClick={() => setActiveModule(null)}
+                      className="relative px-4 py-2 text-gray-200 border border-neutral-700/60 rounded-full bg-neutral-900/50 backdrop-blur-md 
+                      transition-all duration-300 hover:shadow-[0_0_12px_rgba(255,255,255,0.1)]"
+                    >
+                      &larr; Back
+                    </button>
+                  </motion.div>
+
+                  {/* Dropdown with glassy styling */}
+                  <select
+                    value={activeModule}
+                    onChange={(e) => setActiveModule(e.target.value)}
+                    className="bg-neutral-900/40 backdrop-blur-md text-gray-100 px-3 py-2 rounded-xl border border-neutral-700/50 shadow-inner focus:outline-none hover:border-neutral-500/70 transition-all duration-300"
+                  >
+                    {modules.map((mod) => (
+                      <option key={mod} value={mod}>
+                        {mod}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Dropdown with same glassy styling */}
-                <select
-                  value={activeModule}
-                  onChange={(e) => setActiveModule(e.target.value)}
-                  className="bg-neutral-900/40 backdrop-blur-md text-gray-100 px-3 py-2 rounded-xl border border-neutral-700/50 shadow-inner focus:outline-none hover:border-neutral-500/70 transition-all duration-300"
+                {/* Chat window */}
+                <motion.div
+                  className="flex-1 flex flex-col bg-neutral-950/80 backdrop-blur-md rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.05)] p-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35 }}
                 >
-                  {modules.map((mod) => (
-                    <option key={mod} value={mod}>
-                      {mod}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Chat window */}
-              <div className="flex-1 flex flex-col bg-neutral-950/80 backdrop-blur-md rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.05)] p-4">
-                <ChatWindow moduleName={activeModule} />
-              </div>
-            </div>
-          )}
+                  <ChatWindow moduleName={activeModule} />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
     </div>

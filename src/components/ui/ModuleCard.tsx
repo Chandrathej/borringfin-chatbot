@@ -2,6 +2,7 @@
 
 import React from "react";
 import * as Icons from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
 
 interface ModuleCardProps {
   label: string;
@@ -13,19 +14,32 @@ const ModuleCard: React.FC<ModuleCardProps> = ({ label, icon, onClick }) => {
   const IconComponent = (Icons as any)[icon];
 
   return (
-    <div
+    <motion.div
       onClick={onClick}
-      className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl cursor-pointer
+      whileHover={{
+        scale: 1.06,
+        boxShadow: "0 0 18px rgba(0, 200, 255, 0.35)",
+      }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 300, damping: 18 }}
+      className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl cursor-pointer
                  bg-white/5 backdrop-blur-md border border-white/10
-                 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                 shadow-lg hover:shadow-xl transition-all duration-300"
     >
       {IconComponent && (
-        <IconComponent className="w-10 h-10 text-white/70 hover:text-white transition-colors duration-300" />
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="flex items-center justify-center"
+        >
+          <IconComponent className="w-11 h-11 text-white/80 group-hover:text-white transition-colors duration-300" />
+        </motion.div>
       )}
-      <span className="text-white/80 font-semibold text-center hover:text-white transition-colors duration-300">
+      <span className="text-white/90 text-[1.05rem] md:text-lg font-semibold text-center tracking-wide leading-snug">
         {label}
       </span>
-    </div>
+    </motion.div>
   );
 };
 

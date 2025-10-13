@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   HomeIcon,
   ChartBarIcon,
@@ -33,28 +34,29 @@ export default function Sidebar() {
       {/* Top Section */}
       <div className="relative z-10 space-y-4">
         {/* New Chat */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.04, boxShadow: "0 0 12px rgba(0, 180, 255, 0.35)" }}
+          whileTap={{ scale: 0.97 }}
           className="w-full flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-800/40 
-          hover:bg-neutral-700/40 hover:shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:scale-[1.03]
-          active:scale-[0.98] transition-all font-medium cursor-pointer backdrop-blur-md border border-neutral-700/50"
+          hover:bg-neutral-700/40 transition-all font-medium cursor-pointer backdrop-blur-md border border-neutral-700/50"
         >
           <PlusIcon className="w-5 h-5 text-blue-400" />
-          <span>New Chat</span>
-        </button>
+          <span className="text-sm md:text-base font-semibold">New Chat</span>
+        </motion.button>
 
         {/* Menu Items */}
         <div className="mt-6 space-y-2">
           {menuItems.map((item) => (
-            <button
+            <motion.button
               key={item.label}
+              whileHover={{ scale: 1.03, boxShadow: "0 0 10px rgba(0,255,255,0.2)" }}
+              whileTap={{ scale: 0.97 }}
               className="w-full flex items-center gap-3 px-4 py-2 rounded-lg 
-              bg-transparent hover:bg-neutral-800/40 hover:scale-[1.03] 
-              transition-all font-medium cursor-pointer border border-transparent 
-              hover:border-neutral-700/40 hover:shadow-[0_0_10px_rgba(255,255,255,0.08)]"
+              bg-transparent transition-all font-medium cursor-pointer border border-transparent"
             >
               {item.icon}
-              <span>{item.label}</span>
-            </button>
+              <span className="text-sm md:text-base font-medium">{item.label}</span>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -69,15 +71,15 @@ export default function Sidebar() {
         </h3>
         <div className="space-y-2">
           {previousChats.map((chat) => (
-            <button
+            <motion.button
               key={chat}
+              whileHover={{ scale: 1.03, boxShadow: "0 0 8px rgba(0,255,255,0.15)" }}
+              whileTap={{ scale: 0.97 }}
               className="w-full text-left px-4 py-2 rounded-lg bg-transparent 
-              hover:bg-neutral-800/40 hover:scale-[1.03] transition-all 
-              font-medium cursor-pointer border border-transparent 
-              hover:border-neutral-700/40 hover:shadow-[0_0_8px_rgba(255,255,255,0.08)]"
+              transition-all font-medium cursor-pointer border border-transparent"
             >
-              {chat}
-            </button>
+              <span className="text-sm md:text-base">{chat}</span>
+            </motion.button>
           ))}
         </div>
       </div>

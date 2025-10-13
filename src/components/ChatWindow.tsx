@@ -1,6 +1,7 @@
-"use client";
+ "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { MicrophoneIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import { HandThumbUpIcon, HandThumbDownIcon } from "@heroicons/react/24/solid";
 
@@ -78,12 +79,10 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
       sender: "user",
     };
 
-    // Add user message
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setListening(false);
 
-    // Show typing indicator for bot
     const thinkingMessage: Message = {
       id: Date.now() + 1,
       text: "AI is thinking...",
@@ -93,7 +92,6 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
     setMessages((prev) => [...prev, thinkingMessage]);
 
     try {
-      // Prepare conversation for backend
       const conversation = messages
         .map((msg) => ({
           role: msg.sender === "user" ? "user" : "assistant",
@@ -140,38 +138,50 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
           </div>
         )}
 
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${
-              msg.sender === "user" ? "justify-end" : "justify-start"
-            } animate-fadeIn`}
-          >
-            <div
-              className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm transition-all duration-300 ${
-                msg.sender === "user"
-                  ? "bg-blue-600/80 text-white shadow-[0_0_8px_rgba(59,130,246,0.3)]"
-                  : msg.typing
-                  ? "bg-neutral-700/60 text-gray-300 italic animate-pulse"
-                  : "bg-neutral-800/60 text-gray-200 border border-neutral-700/50"
+        <AnimatePresence>
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+              className={`flex ${
+                msg.sender === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {msg.text}
+              <motion.div
+                whileHover={msg.sender === "bot" && !msg.typing ? { scale: 1.02 } : {}}
+                className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm transition-all duration-300 ${
+                  msg.sender === "user"
+                    ? "bg-blue-600/80 text-white shadow-[0_0_8px_rgba(59,130,246,0.3)]"
+                    : msg.typing
+                    ? "bg-neutral-700/60 text-gray-300 italic animate-pulse"
+                    : "bg-neutral-800/60 text-gray-200 border border-neutral-700/50"
+                }`}
+              >
+                {msg.text}
 
-              {/* Feedback icons for bot replies */}
-              {msg.sender === "bot" && !msg.typing && (
-                <div className="flex gap-2 mt-1 justify-start">
-                  <button className="p-1.5 rounded-full hover:bg-neutral-700/70 transition cursor-pointer">
-                    <HandThumbUpIcon className="w-4 h-4 text-green-400" />
-                  </button>
-                  <button className="p-1.5 rounded-full hover:bg-neutral-700/70 transition cursor-pointer">
-                    <HandThumbDownIcon className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+                {msg.sender === "bot" && !msg.typing && (
+                  <div className="flex gap-2 mt-1 justify-start">
+                    <motion.button
+                      whileHover={{ scale: 1.1, backgroundColor: "rgba(34,197,94,0.2)" }}
+                      className="p-1.5 rounded-full transition cursor-pointer"
+                    >
+                      <HandThumbUpIcon className="w-4 h-4 text-green-400" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1, backgroundColor: "rgba(239,68,68,0.2)" }}
+                      className="p-1.5 rounded-full transition cursor-pointer"
+                    >
+                      <HandThumbDownIcon className="w-4 h-4 text-red-400" />
+                    </motion.button>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
       {/* Input Bar */}
@@ -188,13 +198,14 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
             }`}
         />
 
-        {/* Voice Button + Sound Waves */}
         <div className="flex items-center gap-2">
-          <button
+          <motion.button
             onClick={() => {
               if (listening) stopListening();
               else startListening();
             }}
+            whileHover={{ scale: 1.1, boxShadow: listening ? "" : "0 0 6px rgba(0,200,255,0.3)" }}
+            whileTap={{ scale: 0.95 }}
             className={`p-2 rounded-full transition-all duration-300 ${
               listening
                 ? "bg-blue-500/30 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.3)] animate-pulse"
@@ -202,9 +213,8 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
             }`}
           >
             <MicrophoneIcon className="w-6 h-6" />
-          </button>
+          </motion.button>
 
-          {/* Animated Sound Waves */}
           {listening && (
             <div className="flex items-end gap-1 ml-2">
               <div className="w-1 h-3 bg-green-400 animate-bounce"></div>
@@ -215,10 +225,11 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
           )}
         </div>
 
-        {/* Send Button */}
-        <button
+        <motion.button
           onClick={sendMessage}
           disabled={!inputText.trim()}
+          whileHover={inputText.trim() ? { scale: 1.05, boxShadow: "0 0 8px rgba(59,130,246,0.4)" } : {}}
+          whileTap={{ scale: 0.95 }}
           className={`p-2 rounded-full transition-all duration-300 ${
             inputText.trim()
               ? "bg-blue-600/70 hover:bg-blue-500 text-white shadow-[0_0_8px_rgba(59,130,246,0.4)]"
@@ -226,7 +237,7 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
           }`}
         >
           <PaperAirplaneIcon className="w-6 h-6 rotate-90" />
-        </button>
+        </motion.button>
       </div>
     </div>
   );

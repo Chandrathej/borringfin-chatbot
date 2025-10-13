@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import ModuleCard from "./ui/ModuleCard";
 
 interface ModuleBarProps {
@@ -19,16 +20,28 @@ const modules = [
 
 const ModuleBar: React.FC<ModuleBarProps> = ({ onModuleClick }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-      {modules.map((module) => (
-        <ModuleCard
+    <motion.div
+      className="grid grid-cols-2 md:grid-cols-3 gap-6"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      {modules.map((module, index) => (
+        <motion.div
           key={module.label}
-          label={module.label}
-          icon={module.icon}
-          onClick={() => onModuleClick(module.label)}
-        />
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          className="cursor-pointer"
+        >
+          <ModuleCard
+            label={module.label}
+            icon={module.icon}
+            onClick={() => onModuleClick(module.label)}
+          />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
