@@ -1,34 +1,64 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "BoringFin",
-  description: "Your Personal Finance Analyst",
+  title: "BoringFin — Personal Finance Assistant",
+  description:
+    "BoringFin is your AI-powered personal finance butler — helping you manage debt, taxes, goals, investments, and more.",
+  keywords: [
+    "personal finance",
+    "AI finance assistant",
+    "budget planner",
+    "debt management",
+    "investment tracking",
+    "goal planning",
+    "tax optimization",
+  ],
+  authors: [{ name: "BoringFin" }],
+  creator: "BoringFin",
+  publisher: "BoringFin",
+  themeColor: "#0a0a0a",
+  colorScheme: "dark",
+  openGraph: {
+    title: "BoringFin — Personal Finance Assistant",
+    description:
+      "Your AI-powered finance butler for debt, investment, tax, and goal management.",
+    url: "https://www.boringfin.com",
+    siteName: "BoringFin",
+    images: [
+      {
+        url: "/og-image.png", // place your OG image under /public
+        width: 1200,
+        height: 630,
+        alt: "BoringFin App Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BoringFin — Personal Finance Assistant",
+    description:
+      "Your AI-powered finance butler for debt, investment, tax, and goal management.",
+    images: ["/og-image.png"],
+    creator: "@boringfin",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html lang="en" className="bg-neutral-950 text-gray-100">
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }
