@@ -14,9 +14,9 @@ export const metadata: Metadata = {
     "goal planning",
     "tax optimization",
   ],
-  authors: [{ name: "BoringFin" }],
-  creator: "BoringFin",
-  publisher: "BoringFin",
+  authors: [{ name: "Chandrathej Kammati" }],
+  creator: "Chandrathej Kammati",
+  publisher: "Chandrathej Kammati",
   themeColor: "#0a0a0a",
   colorScheme: "dark",
   openGraph: {

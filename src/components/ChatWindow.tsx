@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,7 +33,8 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
   // Initialize SpeechRecognition
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
@@ -48,28 +49,57 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
       setInputText(transcript);
     };
 
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      setListening(false);
+    };
+
+    recognition.onend = () => {
+      // Prevent auto-restart and ensure clean stop
+      setListening(false);
+    };
+
     recognitionRef.current = recognition;
   }, []);
 
-  // Auto-scroll to bottom
+  // Auto-scroll chat to bottom
   useEffect(() => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
+  // --- Speech Control ---
   const startListening = () => {
-    if (!recognitionRef.current || listening) return;
-    recognitionRef.current.start();
-    setListening(true);
+    if (!recognitionRef.current) return;
+
+    try {
+      // Force stop any previous unfinished session to avoid cached transcripts
+      recognitionRef.current.abort();
+      recognitionRef.current.stop();
+
+      setInputText(""); // clear any cached partials
+      recognitionRef.current.start();
+      setListening(true);
+    } catch (err) {
+      console.error("Error starting speech recognition:", err);
+    }
   };
 
   const stopListening = () => {
-    if (!recognitionRef.current || !listening) return;
-    recognitionRef.current.stop();
-    setListening(false);
+    if (!recognitionRef.current) return;
+
+    try {
+      recognitionRef.current.stop();
+      recognitionRef.current.abort(); // ensure full reset
+      setListening(false);
+    } catch (err) {
+      console.error("Error stopping speech recognition:", err);
+    }
   };
 
+  // --- Send Message ---
   const sendMessage = async () => {
     if (!inputText.trim()) return;
 
@@ -115,6 +145,7 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
         )
       );
     } catch (err) {
+      console.error("Chat error:", err);
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === thinkingMessage.id
@@ -125,6 +156,7 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
     }
   };
 
+  // --- JSX ---
   return (
     <div className="flex flex-col h-full w-full rounded-2xl backdrop-blur-md bg-neutral-950/50 border border-neutral-800/50 shadow-inner">
       {/* Messages */}
@@ -151,7 +183,9 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
               }`}
             >
               <motion.div
-                whileHover={msg.sender === "bot" && !msg.typing ? { scale: 1.02 } : {}}
+                whileHover={
+                  msg.sender === "bot" && !msg.typing ? { scale: 1.02 } : {}
+                }
                 className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm transition-all duration-300 ${
                   msg.sender === "user"
                     ? "bg-blue-600/80 text-white shadow-[0_0_8px_rgba(59,130,246,0.3)]"
@@ -165,13 +199,19 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
                 {msg.sender === "bot" && !msg.typing && (
                   <div className="flex gap-2 mt-1 justify-start">
                     <motion.button
-                      whileHover={{ scale: 1.1, backgroundColor: "rgba(34,197,94,0.2)" }}
+                      whileHover={{
+                        scale: 1.1,
+                        backgroundColor: "rgba(34,197,94,0.2)",
+                      }}
                       className="p-1.5 rounded-full transition cursor-pointer"
                     >
                       <HandThumbUpIcon className="w-4 h-4 text-green-400" />
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.1, backgroundColor: "rgba(239,68,68,0.2)" }}
+                      whileHover={{
+                        scale: 1.1,
+                        backgroundColor: "rgba(239,68,68,0.2)",
+                      }}
                       className="p-1.5 rounded-full transition cursor-pointer"
                     >
                       <HandThumbDownIcon className="w-4 h-4 text-red-400" />
@@ -204,7 +244,10 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
               if (listening) stopListening();
               else startListening();
             }}
-            whileHover={{ scale: 1.1, boxShadow: listening ? "" : "0 0 6px rgba(0,200,255,0.3)" }}
+            whileHover={{
+              scale: 1.1,
+              boxShadow: listening ? "" : "0 0 6px rgba(0,200,255,0.3)",
+            }}
             whileTap={{ scale: 0.95 }}
             className={`p-2 rounded-full transition-all duration-300 ${
               listening
@@ -228,7 +271,11 @@ export default function ChatWindow({ moduleName }: ChatWindowProps) {
         <motion.button
           onClick={sendMessage}
           disabled={!inputText.trim()}
-          whileHover={inputText.trim() ? { scale: 1.05, boxShadow: "0 0 8px rgba(59,130,246,0.4)" } : {}}
+          whileHover={
+            inputText.trim()
+              ? { scale: 1.05, boxShadow: "0 0 8px rgba(59,130,246,0.4)" }
+              : {}
+          }
           whileTap={{ scale: 0.95 }}
           className={`p-2 rounded-full transition-all duration-300 ${
             inputText.trim()
