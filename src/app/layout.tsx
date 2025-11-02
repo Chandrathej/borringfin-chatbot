@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import SessionProviderWrapper from "../components/SessionProviderWrapper";
 
 export const metadata: Metadata = {
   title: "BoringFin — Personal Finance Assistant",
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     siteName: "BoringFin",
     images: [
       {
-        url: "/og-image.png", // place your OG image under /public
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "BoringFin App Preview",
@@ -58,7 +59,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="bg-neutral-950 text-gray-100">
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        {/* ✅ Session context available globally */}
+        <SessionProviderWrapper>{children}</SessionProviderWrapper>
+      </body>
     </html>
   );
 }

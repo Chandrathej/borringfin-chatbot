@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply: "No messages provided." }, { status: 400 });
     }
 
-    // Prepend system message
     const chatMessages = [
       {
         role: "system",
