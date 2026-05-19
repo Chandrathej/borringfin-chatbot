@@ -393,8 +393,7 @@ export default function WelcomePage({ user }: { user: any }) {
 
               <div className="flex gap-4 pt-4">
                 <Button
-                  variant="ghost"
-                  className="flex-1 py-6 rounded-2xl text-gray-400 hover:text-gray-200"
+                  className="flex-1 py-6 rounded-2xl text-gray-400 hover:text-gray-200 bg-transparent border-none shadow-none"
                   onClick={prevStep}
                 >
                   Back
