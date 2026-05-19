@@ -171,7 +171,6 @@ export default function WelcomePage({ user }: { user: any }) {
             </p>
             <div className="pt-4">
               <Button
-                size="lg"
                 onClick={nextStep}
                 className="bg-cyan-600 hover:bg-cyan-500 px-8 py-6 text-lg rounded-2xl transition-all shadow-lg hover:shadow-cyan-500/20"
               >
